@@ -1,0 +1,69 @@
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/app-route/app-route.html">
+
+<dom-module id="wave-404-app">
+  <template>
+    <style>
+      :host {
+        display: block;
+
+        padding: 10px 20px;
+      }
+    </style>
+
+    <app-route
+        route="{{route}}"
+        pattern="/:page"
+        data="{{pageData}}"        
+    ></app-route>
+
+    <div>404</div>
+    <div>Н.Е. НАЙДЕНО </div> 
+
+    <div>prefix: [[route.prefix]]</div>
+    <div>path  : [[route.path]]</div>
+
+
+    <!--<a href="/">Домой</a>   -->
+    <!--<a href="/components/paper-button/index.html" target="_blank">paper-button</a>-->
+    
+    
+  </template>
+
+  <script>
+    'use strict';
+    
+    class Wave404App extends Polymer.Element {
+
+      static get is() { return 'wave-404-app'}
+
+      static get config() {
+        return {
+          properties: {
+            appName: {
+              type: String,
+              value: '404',
+              readOnly: true
+            },
+            route: {
+              type: Object,
+              value: () => ({})
+            }
+          }
+        }
+      }
+
+      constructor() {
+        super();
+      }
+
+      connectedCallback() {
+        super.connectedCallback();
+      }
+
+    }
+
+    customElements.define(Wave404App.is, Wave404App) 
+
+  </script>
+</dom-module>

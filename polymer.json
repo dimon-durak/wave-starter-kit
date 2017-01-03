@@ -1,0 +1,18 @@
+{
+  "entrypoint": "index.html",
+  "shell": "src/wave-shell.html",
+  "fragments": [
+    "src/wave-404-app.html",
+    "src/wave-icons.html",
+    "src/shared-styles.html"
+  ],
+  "sourceGlobs": [
+   "src/**/*",
+   "images/**/*",
+   "bower.json"
+  ],
+  "includeDependencies": [
+    "manifest.json",
+    "bower_components/webcomponentsjs/webcomponents-lite.min.js"
+  ]
+}

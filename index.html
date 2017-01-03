@@ -1,0 +1,156 @@
+<!--
+  @license
+  Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+  This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+  The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+  The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+  Code distributed by Google as part of the polymer project is also
+  subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt -->
+
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
+
+    <title>Wave</title>
+    <meta name="description" content="Wave">
+
+    <link rel="icon" href="/images/favicon.ico">
+
+    <!-- См. https://goo.gl/OOhYW5 -->
+    <link rel="manifest" href="/manifest.json">
+
+    <!-- См. https://goo.gl/qRE0vM -->
+    <meta name="theme-color" content="#3f51b5">
+
+    <!-- Добавление на домашний экран Chrome на Android. Fallback для manifest.json -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="Wave">
+
+    <!-- Добавление на домашний экран Safari на iOS -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Wave">
+
+    <!-- Иконки на домашний экран -->
+    <link rel="apple-touch-icon" href="/images/manifest/icon-48x48.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="/images/manifest/icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="96x96" href="/images/manifest/icon-96x96.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/images/manifest/icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="192x192" href="/images/manifest/icon-192x192.png">
+
+    <!-- Иконки для плиток Windows 8 (144x144 + цвет плитки) -->
+    <meta name="msapplication-TileImage" content="/images/manifest/icon-144x144.png">
+    <meta name="msapplication-TileColor" content="#3f51b5">
+    <meta name="msapplication-tap-highlight" content="no">
+
+    <script>
+      // Установка опций Polymer
+      window.Polymer = {
+        dom: 'shadow',
+        // lazyRegister: true
+      };
+
+    </script>
+
+    <link rel="import" id="linkWaveShell" href="/src/wave-shell.html" async>
+
+    <style>
+      body {
+        display: flex;
+        width: 100% !important;
+        height: 100vh;
+        flex-direction: column;
+        margin: 0;
+        background: #fafafa;
+        color: #333;
+        background-color: #eeeeee;
+        font-family: 'Roboto', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        line-height: 1.5;
+      }
+      body.loading {
+        width: 100vw;
+        height: 100vh;
+        overflow: hidden;
+      }
+      #loadingScreen {
+        display: block;
+        position: absolute;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        right: 0;
+        opacity: 1 !important;
+        background: url(/images/wave-logo.png) #37474F center center no-repeat;
+        background-size: 266px 121px;
+        transition: opacity 1s;
+      }
+      body.ready #loadingScreen {
+        opacity: 0 !important;
+      }
+    </style>
+  </head>
+  <body unresolved class="loading">
+
+    <div id="loadingScreen"></div>
+
+    <script id="shellStarter">
+      'use strict';
+
+      document.body.addEventListener('shell-loaded', removeStarter);
+
+      function removeStarter() {
+        document.body.removeEventListener('shell-loaded', removeStarter);
+        document.body.removeChild(shellStarter);
+      };
+
+      function onShellLoaded() {
+        // Удалям экран загрузки по окончании перехода CSS.
+        loadingScreen.addEventListener('transitionend', () => document.body.removeChild(loadingScreen));
+
+        document.body.classList.remove('loading');
+        document.body.classList.add('ready');
+
+        // Добавляем элемент оболочки приложений
+        let shellElement = document.createElement('wave-shell');
+        shellElement.setAttribute('id', 'shell');
+        document.body.appendChild(shellElement);
+        let shell = document.querySelector('#shell');
+        shell.dispatchEvent(new CustomEvent('shell-loaded', {bubbles: true})) 
+      };
+
+      function finishLazyLoading() {
+        let link = document.querySelector('#linkWaveShell');
+        if (link.import && link.import.readyState === 'complete') {
+          onShellLoaded();
+        } else {
+          link.addEventListener('load', onShellLoaded);
+        }
+      };
+
+      // проверяем поддержку веб-компонент в браузере
+      let webComponentsSupported = (
+        'registerElement' in document &&
+        'import' in document.createElement('link') &&
+        'content' in document.createElement('template'));
+
+      if (!webComponentsSupported) {
+        // подставляем костыль
+        let script = document.createElement('script');
+        script.async = true;
+        script.src = 'bower_components/webcomponentsjs/webcomponents-lite.min.js';
+        script.onload = finishLazyLoading;
+        document.head.appendChild(script);
+      } else {
+        finishLazyLoading();
+      };
+
+      // загрузка Service Worker
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => navigator.serviceWorker.register('/service-worker.js'));
+      };
+    </script>
+    
+  </body>
+</html>
