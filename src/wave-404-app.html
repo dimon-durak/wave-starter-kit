@@ -6,9 +6,24 @@
     <style>
       :host {
         display: block;
-
-        padding: 10px 20px;
+        padding: 20px;
       }
+      .door {
+        width: 229px;
+        height:555px;
+        background: url(/images/door-404.png) #37474F center center no-repeat;
+        background-size: 229px 555px; 
+        overflow: hidden;       
+      }
+      .door div {
+        padding: 30px 10px 50px 10px;
+        white-space: nowrap;
+        /*border: 1px solid slateblue*/
+      }
+      .door div:first-child {
+        padding: 50px 0 100px 0;
+        text-align: center; 
+      }      
     </style>
 
     <app-route
@@ -17,11 +32,11 @@
         data="{{pageData}}"        
     ></app-route>
 
-    <div>404</div>
-    <div>Н.Е. НАЙДЕНО </div> 
-
-    <div>prefix: [[route.prefix]]</div>
-    <div>path  : [[route.path]]</div>
+    <div class="door">
+      <div>НЕ НАЙДЕНО</div> 
+      <div title="[[route.prefix]]">app: [[route.prefix]]</div>
+      <div title="[[route.path]]"> path: [[route.path]]</div>
+    </div>
 
 
     <!--<a href="/">Домой</a>   -->
