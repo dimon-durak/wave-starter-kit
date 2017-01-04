@@ -121,11 +121,10 @@
       };
 
       function finishLazyLoading() {
-        let link = document.querySelector('#linkWaveShell');
-        if (link.import && link.import.readyState === 'complete') {
-          onShellLoaded();
+        if (linkWaveShell.import && linkWaveShell.import.readyState === 'complete') {
+          onShellLoaded()           
         } else {
-          link.addEventListener('load', onShellLoaded);
+          linkWaveShell.addEventListener('load', onShellLoaded);
         }
       };
 
