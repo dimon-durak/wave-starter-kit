@@ -1,12 +1,11 @@
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
-
 <link rel="import" href="../bower_components/app-route/app-location.html">
 <link rel="import" href="../bower_components/app-route/app-route.html">
 <link rel="import" href="../bower_components/iron-pages/iron-pages.html">
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../bower_components/paper-toast/paper-toast.html">
 
-<link rel="import" href="wave-404-app.html">
+<link rel="import" href="wave-apps.html">
 
 <dom-module id="wave-shell">
   <template>
@@ -29,21 +28,20 @@
 
     <!--<wave-shell-toolbar> Надо сделать </wave-shell-toolbar>-->
 
-    <iron-pages id="apps" 
+    <iron-pages id="apps"
         selected="[[appName]]"
         attr-for-selected="app-name"
         fallback-selection="404"
         role="main">
-      <!--<wave-404-app  app-name="404" route="{{subroute}}"></wave-404-app>-->
       <wave-404-app route="{{subroute}}"></wave-404-app>
     </iron-pages>
-    
+
     <paper-toast id="toast" duration="5555"></paper-toast>
-    
+
   </template>
   <script>
     'use strict';
-    
+
     class WaveShell extends Polymer.Element {
 
       static get is() { return 'wave-shell'}
@@ -76,7 +74,7 @@
       }
 
       _appChanged(app) {
-        console.log(app)
+        this.appName = app || '404'
       }
 
       showToast(message) {
@@ -86,7 +84,7 @@
 
     }
 
-    customElements.define(WaveShell.is, WaveShell)
+    customElements.define(WaveShell.is, WaveShell);
 
   </script>
 </dom-module>
