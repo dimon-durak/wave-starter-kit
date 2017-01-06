@@ -12,42 +12,40 @@
         width: 229px;
         height:555px;
         background: url(/images/door-404.png) #37474F center center no-repeat;
-        background-size: 229px 555px; 
-        overflow: hidden;       
+        background-size: 229px 555px;
+        overflow: hidden;
       }
       .door div {
         padding: 30px 10px 50px 10px;
         white-space: nowrap;
-        /*border: 1px solid slateblue*/
       }
       .door div:first-child {
         padding: 50px 0 100px 0;
-        text-align: center; 
-      }      
+        text-align: center;
+      }
     </style>
 
     <app-route
         route="{{route}}"
         pattern="/:page"
-        data="{{pageData}}"        
+        data="{{pageData}}"
     ></app-route>
 
     <div class="door">
-      <div>НЕ НАЙДЕНО</div> 
+      <div>НЕ НАЙДЕНО</div>
       <div title="[[route.prefix]]">app: [[route.prefix]]</div>
       <div title="[[route.path]]"> path: [[route.path]]</div>
+      <a href="/anything/andMMMMMoooooooooooooooo000000">Ссылк</a>
+      <a href="/login">login</a>
+      <a href="/404">404</a>
+      
     </div>
 
-
-    <!--<a href="/">Домой</a>   -->
-    <!--<a href="/components/paper-button/index.html" target="_blank">paper-button</a>-->
-    
-    
   </template>
 
   <script>
     'use strict';
-    
+
     class Wave404App extends Polymer.Element {
 
       static get is() { return 'wave-404-app'}
@@ -78,7 +76,7 @@
 
     }
 
-    customElements.define(Wave404App.is, Wave404App) 
+    customElements.define(Wave404App.is, Wave404App);
 
   </script>
 </dom-module>
