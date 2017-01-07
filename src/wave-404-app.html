@@ -53,15 +53,8 @@
       static get config() {
         return {
           properties: {
-            appName: {
-              type: String,
-              value: '404',
-              readOnly: true
-            },
-            route: {
-              type: Object,
-              value: () => ({})
-            }
+            appName: { type: String, value: '404', readOnly: true },
+            route:   { type: Object, value: () => ({}) }
           }
         }
       }
