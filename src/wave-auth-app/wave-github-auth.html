@@ -1,0 +1,44 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+
+<dom-module id="wave-github-auth">
+  <template>
+    <style>
+      :host {
+        display: block;
+        padding: 20px;
+      }
+    </style>
+
+    <a href="https://developer.github.com/v3/oauth/" target="_blank"><h2>GITHUB</h2></a>
+
+  </template>
+
+  <script>
+    'use strict';
+
+    class WaveGithubAuth extends Polymer.Element {
+
+      static get is() { return 'wave-github-auth'}
+
+      static get config() {
+        return {
+          properties: {
+            provider:  { type: String, value: 'github', readOnly: true },
+          }
+        }
+      }
+
+      constructor() {
+        super();
+      }
+
+      connectedCallback() {
+        super.connectedCallback();       
+      }
+
+    }
+
+    customElements.define(WaveGithubAuth.is, WaveGithubAuth);
+
+  </script>
+</dom-module>

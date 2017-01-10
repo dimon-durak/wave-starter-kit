@@ -35,10 +35,11 @@
       <div>НЕ НАЙДЕНО</div>
       <div title="[[route.prefix]]">app: [[route.prefix]]</div>
       <div title="[[route.path]]"> path: [[route.path]]</div>
-      <a href="/anything/andMMMMMoooooooooooooooo000000">Ссылк</a>
-      <a href="/login">login</a>
-      <a href="/404">404</a>
-      
+      <a href="/anything/and/something">Просто ссылк</a>
+      <a href="/[[appName]]">[[appName]]</a>
+      <a href="/[[appName]]/">[[appName]]/</a>
+      <a href="/auth">Вход</a>
+      <a href="/setup">Настройки</a> 
     </div>
 
   </template>
@@ -53,7 +54,7 @@
       static get config() {
         return {
           properties: {
-            appName: { type: String, value: '404', readOnly: true },
+            appName: { type: String, value: '404', readOnly: true, reflectToAttribute: true },
             route:   { type: Object, value: () => ({}) }
           }
         }

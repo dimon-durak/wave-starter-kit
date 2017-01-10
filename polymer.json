@@ -4,7 +4,9 @@
   "fragments": [
     "src/wave-404-app.html",
     "src/wave-icons.html",
-    "src/shared-styles.html"
+    "src/shared-styles.html",
+    "src/wave-apps.html",
+    "src/wave-auth-app/auth-providers.html"
   ],
   "sourceGlobs": [
    "src/**/*",

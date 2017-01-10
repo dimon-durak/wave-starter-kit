@@ -1,0 +1,123 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<script src="https://apis.google.com/js/api.js" async defer></script>
+
+
+
+<dom-module id="wave-google-auth">
+  <template>
+    <style>
+      :host {
+        display: block;
+        padding: 20px;
+      }
+    </style>
+
+    <h2>GOOOOGLE</h2>
+
+
+
+  </template>
+
+  <script>
+    'use strict';
+
+    class WaveGoogleAuth extends Polymer.Element {
+
+      static get is() { return 'wave-google-auth'}
+
+      static get config() {
+        return {
+          properties: {
+            provider: { type: String, value: 'google', readOnly: true },
+            clientId: { type: String, value: () => wave.auth.google.clientId },
+            cookiePolicy: { type: String,  value: () => wave.auth.google.cookiePolicy },
+            scope: { type: String, value: () => [
+              'https://www.googleapis.com/auth/plus.login',
+              'https://www.googleapis.com/auth/plus.me',
+              'https://www.googleapis.com/auth/userinfo.email',
+              'https://www.googleapis.com/auth/userinfo.profile'
+              ].join(' ') },
+            hostedDomain: { type: String, value: null }
+          }
+        }
+      }
+
+      constructor() {
+        super();
+      }
+
+      connectedCallback() {
+        super.connectedCallback(); 
+        // gapi.load('auth2', this.initAuth2);
+        gapi.load('client', this.start);      
+      }
+
+      // initAuth2() {
+      //   if (!('gapi' in window) || !('auth2' in window.gapi) ) {
+      //     return;
+      //   }
+      //   const auth = gapi.auth2.init({
+      //     client_id: wave.auth.google.clientId,
+      //     cookie_policy: wave.auth.google.cookiePolicy,
+      //     scope: [
+      //         'https://www.googleapis.com/auth/plus.login',
+      //         'https://www.googleapis.com/auth/plus.me',
+      //         'https://www.googleapis.com/auth/userinfo.email',
+      //         'https://www.googleapis.com/auth/userinfo.profile'
+      //         ].join(' '),
+      //     hosted_domain: null
+      //   });
+
+      //   // auth['currentUser'].listen(this.handleUserUpdate.bind(this));
+
+      //   auth.then(
+      //     function onFulfilled(response) {
+      //       console.log(response)
+      //     // Let the current user listener trigger the changes.
+      //     },
+      //     function onRejected(error) {
+      //       console.error(error);
+      //     }
+      //   );
+      // }
+
+      
+
+      start() {
+        const client = {
+          apiKey: wave.auth.google.apiKey, 
+          discoveryDocs: wave.auth.google.discoveryDocs, 
+          clientId: wave.auth.google.clientId,
+          scope: 'profile' 
+        };
+
+        gapi.client.init(client)
+          .then( _ =>  gapi.client.people.people.get({ resourceName: 'people/me' }))
+          .then( response => { wave.auth.google.profile = response.result }), 
+          function(reason) {
+          console.error('Error: ' + reason.result.error.message);
+        };
+
+
+      };
+
+
+
+
+
+
+
+
+
+
+
+      signin() {}
+
+      signout() {}
+
+    }
+
+    customElements.define(WaveGoogleAuth.is, WaveGoogleAuth);
+
+  </script>
+</dom-module>

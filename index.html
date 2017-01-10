@@ -37,12 +37,24 @@
     <meta name="msapplication-tap-highlight" content="no">
 
     <script>
+      'use strict';
+
+      const wave = window.wave = window.wave || {};
+
+      wave.api = {};   
+      wave.auth = {};
+      wave.auth.google = {
+        apiKey: 'AIzaSyAIJT0oy4RsUrw0ygUAE0vh2h7Fbvt3gUI',
+        discoveryDocs: ['https://people.googleapis.com/$discovery/rest'],
+        clientId: '1026931085521-anb597nd2jk9ehms6rjvm31ku7h8v5dq.apps.googleusercontent.com',
+        cookiePolicy: 'single_host_origin'
+      };
+
       // Установка опций Polymer
       window.Polymer = {
         dom: 'shadow',
         // lazyRegister: true
       };
-
     </script>
 
     <link rel="import" id="linkWaveShell" href="/src/wave-shell.html" async>
@@ -75,7 +87,7 @@
         opacity: 1 !important;
         background: url(/images/wave-logo.svg) #37474F center center no-repeat;
         background-size: 266px 121px;
-        transition: opacity 1s;
+        transition: opacity 0.3s;
       }
       body.ready #loadingScreen {
         opacity: 0 !important;
@@ -87,7 +99,6 @@
     <div id="loadingScreen"></div>
 
     <script id="shellStarter">
-      'use strict';
 
       document.body.addEventListener('shell-loaded', removeStarter);
 
@@ -107,8 +118,10 @@
         let shellElement = document.createElement('wave-shell');
         shellElement.setAttribute('id', 'shell');
         document.body.appendChild(shellElement);
-        let shell = document.querySelector('#shell');
-        shell.dispatchEvent(new CustomEvent('shell-loaded', {bubbles: true})) 
+
+        wave.shell = document.getElementById('shell');
+        wave.apps  = wave.shell.root.getElementById('apps');
+        wave.shell.dispatchEvent(new CustomEvent('shell-loaded', {bubbles: true}));
       };
 
       function finishLazyLoading() {

@@ -1,0 +1,44 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+
+<dom-module id="wave-inwave-auth">
+  <template>
+    <style>
+      :host {
+        display: block;
+        padding: 20px;
+      }
+    </style>
+
+    <a href="https://habrahabr.ru/post/145988/" target="_blank"><h2>WAVE</h2></a>
+
+  </template>
+
+  <script>
+    'use strict';
+
+    class WaveInwaveAuth extends Polymer.Element {
+
+      static get is() { return 'wave-inwave-auth'}
+
+      static get config() {
+        return {
+          properties: {
+            provider:  { type: String, value: 'wave', readOnly: true },
+          }
+        }
+      }
+
+      constructor() {
+        super();
+      }
+
+      connectedCallback() {
+        super.connectedCallback();       
+      }
+
+    }
+
+    customElements.define(WaveInwaveAuth.is, WaveInwaveAuth);
+
+  </script>
+</dom-module>
