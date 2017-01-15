@@ -1,70 +1,50 @@
-<link rel="import" href="../bower_components/polymer/polymer-element.html">
-<link rel="import" href="../bower_components/iron-pages/iron-pages.html">
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
 
 
-<!--
-  ## Заготовка элемента Polymer 2.0
-
-  ### Использование
-
-  `<wave-setup-app></wave-setup-app>`
--->
-<dom-module id="wave-setup-app"> 
-
-  <template>
-    <custom-style>
-      <style>
-        :host {
-        }
-
-        :host(:hover) {
-        }
-
-        :host([mode="setup"]) {
-        }
-
-      </style>
-    </custom-style>
+<script src="https://apis.google.com/js/api.js" async defer></script>
 
 
-  </template>
+<dom-module id="wave-google-api"> 
 
   <script>
-    class WaveSetupApp extends Polymer.Element { 
+    class WaveGoogleApi extends Polymer.Element { 
       // Вызывается при создании элемента
       constructor() {
         super(); // сначала всегда вызови super()
-        this._mode = '';
+
       }
 
-      static get is() { return 'wave-setup-app' }
+      static get is() { return 'wave-google-api' }
 
       static get config() {
         return {
           properties: {
-            appName: { type: String, value: 'setup', readOnly: true, reflectToAttribute: true }
-          }
+            mode: { type: String, observer: '_onModeChanged' }
+          },
+          observers: [
+            '_routeChanged(route.path)'
+          ]
+
         }
       }
 
       // Явное указание за какими атрибутами наблюдать
-      // static get observedAttributes() {
-      //   return ['mode']
-      // }
+      static get observedAttributes() {
+        return ['mode']
+      }
 
       // Вызывается всякий раз при вставке элемента в DOM 
       // Использовать для установки значений свойств и регистрации слушателей событий
       connectedCallback() {
-        console.info('<wave-setup-app> connect');
-        
-        // this.mode = this.getAttribute('mode') || 'view';
-        // this.addEventListener('click', this.onClick);
-        this.innerHTML = "<h1>wave-setup-app</h1><p>I am a custom element</p>";
+        console.log(`<${this.is}> connect`);
+        this.mode = this.getAttribute('mode') || 'view';
+        this.addEventListener('click', this.onClick);
+        this.innerHTML = "<h1>Hello!</h1><p>I am a custom element</p>";
       }
 
       // Вызывается всякий раз при удалении элемента из DOM
       disconnectedCallback() {
-        console.log('<wave-setup-app> disconnect')
+        console.log(`<${this.is}> disconnect`)
       } 
 
       // Вызывается когда добавляется, удаляется или изменяется атрибут
@@ -91,16 +71,16 @@
         return this._mode;
       }
 
-      // onClick(e) {
-      //   // This should trigger a setter which updates the DOM
-      //   this.checked = !this.checked;
-      //   this.dispatchEvent(new CustomEvent('checked-changed', {
-      //     detail: { checked: this.checked }, bubbles: false
-      //   }));
-      // }
+      onClick(e) {
+        // This should trigger a setter which updates the DOM
+        this.checked = !this.checked;
+        this.dispatchEvent(new CustomEvent('checked-changed', {
+          detail: { checked: this.checked }, bubbles: false
+        }));
+      }
 
     }
 
-    customElements.define(WaveSetupApp.is, WaveSetupApp);
+    customElements.define(WaveGoogleApi.is, WaveGoogleApi); );
   </script>
 </dom-module>

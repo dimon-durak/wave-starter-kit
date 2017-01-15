@@ -49,8 +49,6 @@
     <a href$="/[[appName]]/"><div>[[appName]]/</div></a> 
     <a href="/err/"><div>404</div></a> 
 
-
-
   </template>
 
   <script>
@@ -64,11 +62,11 @@
         return {
           properties: {
             appName:  { type: String, value: 'auth', readOnly: true, reflectToAttribute: true },
+            provider: { type: String, value: 'google'   },
             route:    { type: Object, value: () => ({}) },
-            provider: { type: String, value: 'google' },
           },
           observers: [
-            'routeChanged(route.path)'
+            '_routeChanged(route.path)'
           ]
         }
       }
@@ -78,15 +76,12 @@
       }
 
       connectedCallback() {
-        super.connectedCallback();
-        // console.dir(JSON.stringify(this.providerData.provider));
-        
+        super.connectedCallback();       
       }
 
-      routeChanged(path) {
+      _routeChanged(path) {
         this.provider = (path) ? this.providerData.provider : '/' 
       }
-
     }
 
     customElements.define(WaveAuthApp.is, WaveAuthApp);

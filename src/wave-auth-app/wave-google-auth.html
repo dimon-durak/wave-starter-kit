@@ -1,7 +1,12 @@
 <link rel="import" href="../../bower_components/polymer/polymer-element.html">
-<script src="https://apis.google.com/js/api.js" async defer></script>
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<!--<link rel="import" href="../../bower_components/polymerfire/firebase-app.html">-->
+<!--<link rel="import" href="../../bower_components/polymerfire/firebase-auth.html">-->
+<link rel="import" href="../../bower_components/polymerfire/firebase-document.html">
 
+<script src="../../bower_components/firebase/firebase.js"></script>
 
+<script type="text/javascript" src="https://apis.google.com/js/client.js"></script>
 
 <dom-module id="wave-google-auth">
   <template>
@@ -12,9 +17,19 @@
       }
     </style>
 
+    <firebase-document id="fbProfile" path="users/profile/[[_user.uid]]" data="{{user}}" log></firebase-document>
+
     <h2>GOOOOGLE</h2>
 
+    <div hidden$="[[user.uid]]">
+      <paper-button id="signin"  on-tap="signIn"  raised >Вход с Google</paper-button>
+    </div>
 
+    <div hidden$="[[!user.uid]]">
+      <!--<wave-user-card>Надо сделать</wave-user-card>-->
+      <div>[[user.displayName]]</div>
+      <paper-button id="signout" on-tap="signOut" raised >Выход</paper-button> 
+    </div>
 
   </template>
 
@@ -29,57 +44,339 @@
         return {
           properties: {
             provider: { type: String, value: 'google', readOnly: true },
-            clientId: { type: String, value: () => wave.auth.google.clientId },
-            cookiePolicy: { type: String,  value: () => wave.auth.google.cookiePolicy },
-            scope: { type: String, value: () => [
-              'https://www.googleapis.com/auth/plus.login',
-              'https://www.googleapis.com/auth/plus.me',
-              'https://www.googleapis.com/auth/userinfo.email',
-              'https://www.googleapis.com/auth/userinfo.profile'
-              ].join(' ') },
-            hostedDomain: { type: String, value: null }
+            user:     { type: Object },
           }
         }
       }
 
       constructor() {
         super();
+        this._user = null;
+
       }
 
       connectedCallback() {
-        super.connectedCallback(); 
-        // gapi.load('auth2', this.initAuth2);
-        gapi.load('client', this.start);      
+        super.connectedCallback();
+        wave.auth.google = this;
+
+        firebase.initializeApp(wave.secrets.firebase); 
+        this.$.fbProfile.addEventListener('firebase-value', this.onProfileValue)      
       }
 
-      // initAuth2() {
-      //   if (!('gapi' in window) || !('auth2' in window.gapi) ) {
-      //     return;
-      //   }
-      //   const auth = gapi.auth2.init({
-      //     client_id: wave.auth.google.clientId,
-      //     cookie_policy: wave.auth.google.cookiePolicy,
-      //     scope: [
-      //         'https://www.googleapis.com/auth/plus.login',
-      //         'https://www.googleapis.com/auth/plus.me',
-      //         'https://www.googleapis.com/auth/userinfo.email',
-      //         'https://www.googleapis.com/auth/userinfo.profile'
-      //         ].join(' '),
-      //     hosted_domain: null
-      //   });
+      onProfileValue(e) {
+        console.log('<wave-google-auth.html> ', e);
+        
+      }
 
-      //   // auth['currentUser'].listen(this.handleUserUpdate.bind(this));
+      signIn() {
+        let provider = new firebase.auth.GoogleAuthProvider();
 
-      //   auth.then(
-      //     function onFulfilled(response) {
-      //       console.log(response)
-      //     // Let the current user listener trigger the changes.
-      //     },
-      //     function onRejected(error) {
-      //       console.error(error);
-      //     }
-      //   );
-      // }
+        provider.addScope('https://www.googleapis.com/auth/plus.login');
+        provider.addScope('https://www.googleapis.com/auth/plus.me');
+
+        firebase.auth().signInWithPopup(provider)
+          .then(result => {
+            let token = result.credential.accessToken;
+            console.log('token: ' + token);
+            let user = {
+              uid: result.user.uid,
+              displayName: result.user.displayName || '',
+              email: result.user.email,
+              photoURL: result.user.photoURL || ''
+            };
+            this.set('_user', user);
+
+            return user;            
+          })
+          .then(user => {
+            let profileRef = firebase.database().ref(`users/profile/${user.uid}`);
+
+            profileRef.once('value', snapshot => {
+              if (!snapshot.val()) {
+                profileRef.set(user)
+              }
+            })
+
+            // wave.shell.showToast(`Добро пожаловать, ${user.displayName}`);
+          })
+          .catch(function(error) {
+            console.error(error);
+            wave.shell.showToast(error.message);            
+          });
+      }
+
+      signOut() {
+        firebase.auth().signOut()
+          .then(() => {
+            this.set('user', null);
+            wave.shell.showToast('До свидания!');
+        }, function(error) {
+            console.error(error);
+        });
+      }
+
+    }
+
+    customElements.define(WaveGoogleAuth.is, WaveGoogleAuth);
+
+  </script>
+</dom-module>
+
+
+
+
+
+
+
+<!--
+  <script>
+    'use strict';
+
+    class WaveGoogleAuth extends Polymer.Element {
+
+      static get is() { return 'wave-google-auth'}
+
+      static get config() {
+        return {
+          properties: {
+            provider: { type: String, value: 'google', readOnly: true },
+            clientId: { type: String },
+            cookiePolicy: { type: String },
+            
+          }
+        }
+      }
+
+      constructor() {
+        super();
+        this._clientId = null;
+        this._cookiePolicy = 'single_host_origin';
+        this._requestVisibleActions = '';
+        this._hostedDomain = '';
+        this._offline = false;
+        this._offlineAlwaysPrompt = false;
+        this.offlineGranted = false;
+        // this._apiLoader = null;
+        this._requestedScopeArray = [];
+        this._signedIn = false;
+        this._grantedScopeArray = [];
+        this._needAdditionalAuth = true;
+        this._hasPlusScopes = false;
+        this.signinAwares = [];
+      }
+
+      connectedCallback() {
+        super.connectedCallback();
+        this.clientId = wave.secrets.google.clientId;
+        this.loadAuth2();
+
+        wave.auth.google = {};
+        wave.auth.google.Auth = this;
+      }
+      ready() {
+      }
+
+      get clientId() {
+        return this._clientId;
+      }
+
+      set clientId(val) {
+        if (this._clientId && val && val != this._clientId) {
+          throw new Error(`<wave-google-auth> - clientId не может быть изменён\n  новое значение: ${val}\n  старое значение: ${this._clientId}`);
+        }
+        if (val && val != this._clientId) {
+          this._clientId = val;
+          this.initAuth2();
+        }
+      }
+
+      get cookiePolicy() {
+        return this._cookiePolicy;
+      }
+
+      set cookiePolicy(val) {
+        if (val) {
+          this._cookiePolicy = val
+        }
+      }
+      
+      get requestVisibleactions() {
+        return this._requestVisibleActions;
+      }
+
+      set requestVisibleactions(val) {
+        if (this._requestVisibleActions && val && val != this._requestVisibleActions) {
+          throw new Error(`<wave-google-auth> - requestVisibleactions не может быть изменён\n  новое значение: ${val}\n  старое значение: ${this._requestVisibleActions}`);
+        }
+        if (val)
+          this._requestVisibleActions = val;
+      }
+
+      get hostedDomain() {
+        return this._hostedDomain;
+      }
+
+      set hostedDomain(val) {
+        if (this._hostedDomain && val && val != this._hostedDomain) {
+          throw new Error(`<wave-google-auth> - hostedDomain не может быть изменён\n  новое значение: ${val}\n  старое значение: ${this._hostedDomain}`);
+        }
+        if (val)
+          this._hostedDomain = val;
+      }
+
+      get offline() {
+        return this._offline;
+      }
+
+      set offline(val) {
+        this._offline = val;
+        this.updateAdditionalAuth();
+      }
+
+      get offlineAlwaysPrompt() {
+        return this._offlineAlwaysPrompt;
+      }
+
+      set offlineAlwaysPrompt(val) {
+        this._offlineAlwaysPrompt = val;
+        this.updateAdditionalAuth();
+      }
+
+      get requestedScopes() {
+        return this._requestedScopeArray.join(' ');
+      }
+
+      loadAuth2() {
+        gapi.load('auth2', this.initAuth2);
+      }
+
+      initAuth2() {
+        if (!('gapi' in window) || !('auth2' in window.gapi) || !this.clientId) {
+          return;
+        }
+        let auth = gapi.auth2.init({
+          'client_id': this.clientId,
+          'cookie_policy': this.cookiePolicy,
+          'scope': this.requestedScopes,
+          'hosted_domain': this.hostedDomain
+        });
+
+        auth['currentUser'].listen(this.handleUserUpdate);
+
+        auth.then(
+          function onFulfilled() {
+          // Let the current user listener trigger the changes.
+          },
+          function onRejected(error) {
+            console.error(error);
+          }
+        );
+      }
+
+      handleUserUpdate(newPrimaryUser) {
+        // update and broadcast currentUser
+        var isSignedIn = newPrimaryUser.isSignedIn();
+        if (isSignedIn != this._signedIn) {
+          this._signedIn = isSignedIn;
+          for (var i=0; i<this.signinAwares.length; i++) {
+            this.signinAwares[i]._setSignedIn(isSignedIn);
+          }
+        }
+
+        // update granted scopes
+        this._grantedScopeArray = this.strToScopeArray(
+          newPrimaryUser.getGrantedScopes());
+        // console.log(this._grantedScopeArray);
+        this.updateAdditionalAuth();
+
+        var response = newPrimaryUser.getAuthResponse();
+        for (var i=0; i<this.signinAwares.length; i++) {
+          this.signinAwares[i]._updateScopeStatus(response);
+        }
+      }
+
+
+
+
+
+      getMissingScopes() {
+        return this._requestedScopeArray.filter( function(scope) {
+          return this._grantedScopeArray.indexOf(scope) === -1;
+        }.bind(this)).join(' ');
+      }
+
+      assertAuthInitialized() {
+        if (!this.clientId) {
+          throw new Error("AuthEngine not initialized. clientId has not been configured.");
+        }
+        if (!('gapi' in window)) {
+          throw new Error("AuthEngine not initialized. gapi has not loaded.");
+        }
+        if (!('auth2' in window.gapi)) {
+          throw new Error("AuthEngine not initialized. auth2 not loaded.");
+        }
+      }
+
+      signIn(e) {
+        this.assertAuthInitialized();
+        var params = {
+          'scope': this.getMissingScopes()
+        };
+
+
+      }
+    }
+
+    customElements.define(WaveGoogleAuth.is, WaveGoogleAuth);
+
+  </script>
+-->
+
+
+
+<!--<script>
+
+  scope: { type: String, value: () => [
+              'https://www.googleapis.com/auth/plus.login',
+              'https://www.googleapis.com/auth/plus.me',
+              'https://www.googleapis.com/auth/userinfo.email',
+              'https://www.googleapis.com/auth/userinfo.profile'
+              ].join(' ') }
+
+
+
+
+
+
+
+      initAuth2() {
+        if (!('gapi' in window) || !('auth2' in window.gapi) ) {
+          return;
+        }
+        const auth = gapi.auth2.init({
+          client_id: wave.auth.google.clientId,
+          cookie_policy: wave.auth.google.cookiePolicy,
+          scope: [
+              'https://www.googleapis.com/auth/plus.login',
+              'https://www.googleapis.com/auth/plus.me',
+              'https://www.googleapis.com/auth/userinfo.email',
+              'https://www.googleapis.com/auth/userinfo.profile'
+              ].join(' '),
+          hosted_domain: null
+        });
+
+        // auth['currentUser'].listen(this.handleUserUpdate.bind(this));
+
+        auth.then(
+          function onFulfilled(response) {
+            console.log(response)
+          // Let the current user listener trigger the changes.
+          },
+          function onRejected(error) {
+            console.error(error);
+          }
+        );
+      }
 
       
 
@@ -101,23 +398,4 @@
 
       };
 
-
-
-
-
-
-
-
-
-
-
-      signin() {}
-
-      signout() {}
-
-    }
-
-    customElements.define(WaveGoogleAuth.is, WaveGoogleAuth);
-
-  </script>
-</dom-module>
+</script>-->
