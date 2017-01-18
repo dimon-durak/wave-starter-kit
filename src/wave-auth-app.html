@@ -34,11 +34,15 @@
           <a href="/auth/vk">vk</a>
           <a href="/auth/yandex">yandex</a>
           <a href="/auth/wave">wave</a>      
+          <a href="/auth/facebook">facebook</a>      
+          <a href="/auth/twitter">twitter</a>      
         </div>
       </section>
 
       <wave-google-auth></wave-google-auth>
       <wave-github-auth></wave-github-auth>
+      <wave-facebook-auth></wave-facebook-auth>
+      <wave-twitter-auth></wave-twitter-auth>
       <wave-vk-auth></wave-vk-auth>
       <wave-yandex-auth></wave-yandex-auth>
       <wave-inwave-auth></wave-inwave-auth>
@@ -48,8 +52,6 @@
     <a href$="/[[appName]]"><div>[[appName]]</div></a> 
     <a href$="/[[appName]]/"><div>[[appName]]/</div></a> 
     <a href="/err/"><div>404</div></a> 
-
-
 
   </template>
 
@@ -64,11 +66,11 @@
         return {
           properties: {
             appName:  { type: String, value: 'auth', readOnly: true, reflectToAttribute: true },
+            provider: { type: String, value: 'google'   },
             route:    { type: Object, value: () => ({}) },
-            provider: { type: String, value: 'google' },
           },
           observers: [
-            'routeChanged(route.path)'
+            '_routeChanged(route.path)'
           ]
         }
       }
@@ -78,15 +80,12 @@
       }
 
       connectedCallback() {
-        super.connectedCallback();
-        // console.dir(JSON.stringify(this.providerData.provider));
-        
+        super.connectedCallback();       
       }
 
-      routeChanged(path) {
+      _routeChanged(path) {
         this.provider = (path) ? this.providerData.provider : '/' 
       }
-
     }
 
     customElements.define(WaveAuthApp.is, WaveAuthApp);

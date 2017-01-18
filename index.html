@@ -38,18 +38,6 @@
 
     <script>
       'use strict';
-
-      const wave = window.wave = window.wave || {};
-
-      wave.api = {};   
-      wave.auth = {};
-      wave.auth.google = {
-        apiKey: 'AIzaSyAIJT0oy4RsUrw0ygUAE0vh2h7Fbvt3gUI',
-        discoveryDocs: ['https://people.googleapis.com/$discovery/rest'],
-        clientId: '1026931085521-anb597nd2jk9ehms6rjvm31ku7h8v5dq.apps.googleusercontent.com',
-        cookiePolicy: 'single_host_origin'
-      };
-
       // Установка опций Polymer
       window.Polymer = {
         dom: 'shadow',
@@ -104,12 +92,18 @@
 
       function removeStarter() {
         document.body.removeEventListener('shell-loaded', removeStarter);
+        linkWaveShell.removeEventListener('load', onShellLoaded);
         document.body.removeChild(shellStarter);
+      };
+
+      function removeLoadingScreen() {
+        loadingScreen.removeEventListener('transitionend', removeStarter);
+        document.body.removeChild(loadingScreen)
       };
 
       function onShellLoaded() {
         // Удалям экран загрузки по окончании перехода CSS.
-        loadingScreen.addEventListener('transitionend', () => document.body.removeChild(loadingScreen));
+        loadingScreen.addEventListener('transitionend', removeLoadingScreen);
 
         document.body.classList.remove('loading');
         document.body.classList.add('ready');
@@ -118,10 +112,9 @@
         let shellElement = document.createElement('wave-shell');
         shellElement.setAttribute('id', 'shell');
         document.body.appendChild(shellElement);
-
-        wave.shell = document.getElementById('shell');
-        wave.apps  = wave.shell.root.getElementById('apps');
-        wave.shell.dispatchEvent(new CustomEvent('shell-loaded', {bubbles: true}));
+        document.getElementById('shell').dispatchEvent(
+          new CustomEvent('shell-loaded', {bubbles: true})
+        );
       };
 
       function finishLazyLoading() {
