@@ -1,5 +1,7 @@
 <link rel="import" href="../../bower_components/polymer/polymer-element.html">
 
+<!--<script src="https://vk.com/js/api/xd_connection.js?2"  type="text/javascript"></script>-->
+
 <dom-module id="wave-vk-auth">
   <template>
     <style>
@@ -33,7 +35,16 @@
       }
 
       connectedCallback() {
-        super.connectedCallback();       
+        super.connectedCallback();   
+        wave.auth.vk = this;
+
+        // VK.init(function() { 
+        //      // API initialization succeeded 
+        //      // Your code here 
+        //   }, function() { 
+        //      // API initialization failed 
+        //      // Can reload page here 
+        // }, '5.62')    
       }
 
     }

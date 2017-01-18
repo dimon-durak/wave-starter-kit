@@ -4,6 +4,8 @@
 <link rel="import" href="../bower_components/iron-pages/iron-pages.html">
 <link rel="import" href="../bower_components/paper-toast/paper-toast.html">
 
+<link rel="import" href="../bower_components/polymerfire/firebase-app.html">
+
 <link rel="import" href="wave-apps.html">
 
 <dom-module id="wave-shell">
@@ -16,6 +18,8 @@
       }
     </style>
 
+    <firebase-app id="firebase"></firebase-app>    
+    
     <app-location route="{{route}}"></app-location>
 
     <app-route
@@ -90,6 +94,10 @@
         
         wave.shell = this;
         wave.apps  = wave.shell.root.getElementById('apps');
+
+        this.$.firebase.setAttribute('api-key',      wave.secrets.firebase.apiKey);
+        this.$.firebase.setAttribute('auth-domain',  wave.secrets.firebase.authDomain);
+        this.$.firebase.setAttribute('database-url', wave.secrets.firebase.databaseURL);
       }
 
       _appRouteChanged(appRoute) {

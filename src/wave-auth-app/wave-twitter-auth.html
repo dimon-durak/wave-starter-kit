@@ -4,7 +4,7 @@
 <link rel="import" href="../../bower_components/polymerfire/firebase-auth.html">
 <link rel="import" href="../../bower_components/polymerfire/firebase-document.html">
 
-<dom-module id="wave-google-auth">
+<dom-module id="wave-twitter-auth">
   <template>
     <style>
       :host {
@@ -16,10 +16,10 @@
     <firebase-auth id="auth" user="{{_user}}" provider="[[provider]]"></firebase-auth>
     <firebase-document path="users/profile/[[_user.uid]]" data="{{user}}"></firebase-document>
 
-    <h2>GOOOOGLE</h2>
+    <a href="https://apps.twitter.com/" target="_blank"><h2>TWITTER</h2></a>
 
     <div hidden$="[[user.uid]]">
-      <paper-button on-tap="login"  raised >Вход с Google</paper-button>
+      <paper-button on-tap="login"  raised >Вход с Twitter</paper-button>
     </div>
 
     <div hidden$="[[!user.uid]]">
@@ -33,14 +33,14 @@
   <script>
     'use strict';
 
-    class WaveGoogleAuth extends Polymer.Element {
+    class WaveTwitterAuth extends Polymer.Element {
 
-      static get is() { return 'wave-google-auth'}
+      static get is() { return 'wave-twitter-auth'}
 
       static get config() {
         return {
           properties: {
-            provider: { type: String, value: 'google', readOnly: true },
+            provider:  { type: String, value: 'twitter', readOnly: true },
             user:     { type: Object },
           }
         }
@@ -51,8 +51,8 @@
       }
 
       connectedCallback() {
-        super.connectedCallback();
-        wave.auth.google = this;     
+        super.connectedCallback(); 
+        wave.auth.twitter = this;      
       }
 
       login() {
@@ -60,6 +60,8 @@
         return this.$.auth.signInWithPopup()
           .then( response => {
             let token = response.credential.accessToken;
+            console.log('Twitter accessToken: ', token);
+            
             let user = {
               uid: response.user.uid,
               displayName: response.user.displayName || '',
@@ -77,7 +79,21 @@
           })
           .catch( error => {
             console.error(error);
-            wave.shell.showToast(error.message);            
+            let message = '';
+
+            if (error.code === 'auth/account-exists-with-different-credential') {
+
+              if (error.email.split('@')[1] === 'gmail.com') {
+                message = 'Залогинься с Google!';
+                wave.apps.querySelector('wave-auth-app').set('route.path', '/google');
+              } else {
+                message = 'Такой email уже зарегистрирован';
+              }
+            } else {
+              message = error.message
+            }
+
+            wave.shell.showToast(message);            
           });
       }
 
@@ -91,9 +107,36 @@
           );
       }
 
+      link() {
+        let user = firebase.auth().currentUser;
+        if (!user.providerData.find( data => data.providerId === 'twitter.com')) {
+          user.linkWithPopup(new firebase.auth.TwitterAuthProvider())
+            .then(
+              user => wave.shell.showToast('Вход с Twitter подключен'),
+              error => {
+                wave.shell.showToast('Ошибка! Подробности см. в консоле');
+                console.log(error);       
+            }
+            )
+        }
+      }
+      
+      unlink() {
+        let user = firebase.auth().currentUser;
+        if (user.providerData.find( data => data.providerId === 'twitter.com')) {
+          user.unlink('twitter.com').then(
+            _ => wave.shell.showToast('Вход с Twitter отключен'),
+            error => {
+              wave.shell.showToast('Ошибка! Подробности см. в консоле');
+              console.log(error);       
+            }
+          )
+        }
+      }      
+
     }
 
-    customElements.define(WaveGoogleAuth.is, WaveGoogleAuth);
+    customElements.define(WaveTwitterAuth.is, WaveTwitterAuth);
 
   </script>
 </dom-module>
